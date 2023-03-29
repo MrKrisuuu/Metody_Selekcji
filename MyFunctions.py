@@ -1,6 +1,10 @@
 from jmetal.core.problem import BinaryProblem, FloatProblem, IntegerProblem, PermutationProblem  # Typ problemu
 from jmetal.core.solution import BinarySolution, FloatSolution, IntegerSolution, PermutationSolution  # Typ rozwiązania
+from jmetal.problem.singleobjective.unconstrained import Rastrigin
+
+
 from math import cos, pi
+
 
 class RastriginFunction(FloatProblem):
     def __init__(self, number_of_variables: int = 10):

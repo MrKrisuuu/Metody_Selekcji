@@ -1,8 +1,13 @@
 from jmetal.core.operator import Selection
+from jmetal.operator.selection import *  # Selekcja
+
 from typing import List, TypeVar
 from random import sample
 
+
 S = TypeVar('S')
+
+
 class MySelection(Selection[List[S], S]):
     def __init__(self):
         super(MySelection, self).__init__()
