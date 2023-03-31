@@ -5,6 +5,9 @@ from jmetal.operator import PolynomialMutation  # Mutacja
 from jmetal.util.termination_criterion import StoppingByEvaluations  # Warunek końca
 
 import time
+import copy
+
+from MySelections import MyNeuralNetworkSelection
 
 
 S = TypeVar("S")
@@ -32,8 +35,11 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         """Execute the algorithm."""
         self.start_computing_time = time.time()
 
+        if isinstance(self.selection_operator, MyNeuralNetworkSelection):
+            self.selection_operator.train_model(self.problem)
+
         if initial_solutions:
-            self.solutions = initial_solutions
+            self.solutions = copy.deepcopy(initial_solutions)
         else:
             self.solutions = self.create_initial_solutions()
         self.solutions = self.evaluate(self.solutions)
@@ -53,11 +59,14 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         mating_population = []
 
         while len(mating_population) < self.mating_pool_size:
-            solution = self.selection_operator.execute(population)
+            if isinstance(self.selection_operator, MyNeuralNetworkSelection):
+                solution = self.selection_operator.execute(population, self.mating_pool_size)
+            else:
+                solution = self.selection_operator.execute(population)
 
             if isinstance(solution, list):
                 mating_population = mating_population + solution
             else:
                 mating_population.append(solution)
 
-        return mating_population
+        return mating_population[:self.mating_pool_size]
