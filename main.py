@@ -5,6 +5,7 @@ from MyGeneticAlgorithm import MyGeneticAlgorithm
 from MyFunctions import RastriginFunction, Sphere
 from MySelections import (
     MyNeuralNetworkSelection,
+    MyRandomSelection,
     BestSolutionSelection,
     BinaryTournamentSelection,
     RandomSolutionSelection,
@@ -26,8 +27,8 @@ def run_selections(
     problems: List[Problem],
     selections: List[Selection],
 ):
-    population_size = 100
-    offspring_population_size = 100
+    population_size = 50
+    offspring_population_size = 20
     steps = 100
     for problem in problems:
         initial_solutions = create_initial_solutions(problem, population_size)
@@ -56,11 +57,12 @@ def run_selections(
 
 if __name__ == "__main__":
     problems = [
-        # RastriginFunction(3),
-        Sphere(10)
+        RastriginFunction(100),
+        #Sphere(10)
     ]
     selections = [
         MyNeuralNetworkSelection(),
+        MyRandomSelection(),
         BestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),

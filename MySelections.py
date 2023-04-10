@@ -8,8 +8,28 @@ import tensorflow as tf
 from jmetal.config import store
 from itertools import combinations
 
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
 
 S = TypeVar("S")
+
+global nr
+nr = 1
+def save(sols, sums):
+    global nr
+    plt.scatter(sols, sums, color="red")
+    reg = LinearRegression().fit([[sol] for sol in sols], sums)
+    a = reg.coef_
+    b = reg.intercept_
+    x_min = min(sols)
+    x_max = max(sols)
+    plt.plot([x_min, x_max], [a * x_min + b, a * x_max + b])
+    plt.title(f"Epoch: {nr}")
+    plt.savefig(f"./states/{nr}.png")
+    plt.clf()
+    nr += 1
 
 
 class MyNeuralNetworkSelection(Selection[List[S], S]):
@@ -27,17 +47,15 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
         else:
             matrix = [[0 for _ in range(len(front))] for _ in range(len(front))]
             individuals = []
-            print()
-            print([sol.objectives[0] for sol in front])
             for (x, y) in combinations(range(len(front)), 2):
                 individuals.append(front[x].variables + front[y].variables)
             sols = self.model.predict(individuals)
             for (i, (x, y)) in enumerate(combinations(range(len(front)), 2)):
                 matrix[x][y] = sols[i][0]
                 matrix[y][x] = -sols[i][0]
+            sols = [sol.objectives[0] for sol in front]
             sums = [sum(row) for row in matrix]
-            print(sums)
-            print()
+            #save(sols, sums)
             my_result = list(zip(front, sums))
             my_result.sort(key=lambda ind: ind[1], reverse=True)
             result = []
@@ -50,7 +68,7 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
         return "MyNeuralNetworkSelection"
 
     def train_model(self, problem):
-        training_population = 200
+        training_population = 100
         model = tf.keras.models.Sequential(
             [
                 tf.keras.layers.Dense(2 * problem.number_of_variables, activation="relu"),
@@ -73,3 +91,41 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
             y_train.append([result])
         model.fit(x_train, y_train, epochs=20)
         self.model = model
+
+
+class MyRandomSelection(Selection[List[S], S]):
+    def __init__(self):
+        super(MyRandomSelection, self).__init__()
+
+    def evaluate(self, sol1, sol2):
+        val1 = np.random.normal(sol1.objectives[0], sol1.objectives[0])
+        val2 = np.random.normal(sol2.objectives[0], sol2.objectives[0])
+        return val2 - val1
+
+    def execute(self, front: List[S], number=None) -> S:
+        if front is None:
+            raise Exception("The front is null")
+        elif len(front) == 0:
+            raise Exception("The front is empty")
+
+        if len(front) == 1:
+            result = front[0]
+        else:
+            matrix = [[0 for _ in range(len(front))] for _ in range(len(front))]
+            for (x, y) in combinations(range(len(front)), 2):
+                val = self.evaluate(front[x], front[y])
+                matrix[x][y] = val
+                matrix[y][x] = -val
+            sols = [sol.objectives[0] for sol in front]
+            sums = [sum(row) for row in matrix]
+            #save(sols, sums)
+            my_result = list(zip(front, sums))
+            my_result.sort(key=lambda ind: ind[1], reverse=True)
+            result = []
+            for sol, _ in my_result:
+                result.append(sol)
+            result = result[:number]
+        return result
+
+    def get_name(self) -> str:
+        return "MyRandomSelection"
