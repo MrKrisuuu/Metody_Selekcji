@@ -1,6 +1,5 @@
 from typing import Callable, List
 
-import tensorflow as tf
 from MyGeneticAlgorithm import MyGeneticAlgorithm
 from MyFunctions import RastriginFunction, Sphere
 from MySelections import (
@@ -27,9 +26,9 @@ def run_selections(
     problems: List[Problem],
     selections: List[Selection],
 ):
-    population_size = 50
-    offspring_population_size = 20
-    steps = 100
+    population_size = 200
+    offspring_population_size = 50
+    steps = 200
     for problem in problems:
         initial_solutions = create_initial_solutions(problem, population_size)
         for selection in selections:
@@ -58,10 +57,10 @@ def run_selections(
 if __name__ == "__main__":
     problems = [
         RastriginFunction(100),
-        #Sphere(10)
+        #Sphere(100)
     ]
     selections = [
-        MyNeuralNetworkSelection(),
+        #MyNeuralNetworkSelection(),
         MyRandomSelection(),
         BestSolutionSelection(),
         BinaryTournamentSelection(),
