@@ -2,12 +2,14 @@ from typing import Callable, List
 
 from MyGeneticAlgorithm import MyGeneticAlgorithm
 from MyFunctions import RastriginFunction, Sphere
+from plot import plot_iterations, plot_time
 from selections import (
     MyCauchyFadingSelection,
     MyCauchySelection,
     MyNeuralNetworkSelection,
     MyNormalPairwiseComparisonSelection,
     MyOptimizedNormalPairwiseComparisonSelection,
+    MyOptimizedCauchyPairwiseComparisonSelection,
     MyNormalSelection,
     MyNormalFadingSelection,
     BestSolutionSelection,
@@ -19,10 +21,6 @@ from jmetal.core.operator import Selection
 
 
 from jmetal.config import store
-
-import matplotlib.pyplot as plt
-
-from statistics import mean
 
 
 def create_initial_solutions(problem, population_size):
@@ -67,26 +65,20 @@ def run_selections(problems: List[Problem], selections: List[Selection], times: 
                 print(
                     f"{i+1}. {selection.get_name()} for {problem.get_name()}: {best_solution.objectives[0]} in {algorithm.total_computing_time} seconds"
                 )
-        for selection_name in results:
-            avg = [0 for _ in range(steps + 1)]
-            for res in results[selection_name]["solutions"]:
-                for i, val in enumerate(res):
-                    avg[i] += val / times
-            total_time = mean(results[selection_name]["times"])
-            print(f"Total time for {selection_name}: {total_time} seconds")
-            plt.plot(range(steps + 1), avg, label=selection_name)
-        plt.yscale("log")
-        plt.legend()
-        plt.savefig(f"./result.png")
-        plt.show()
+        plot_iterations(results, steps, times)
+        # plot_time(results, steps, times)
 
 
 if __name__ == "__main__":
-    problems = [RastriginFunction(100), Sphere(100)]
+    problems = [
+        RastriginFunction(100),
+        # Sphere(100)
+    ]
     selections = [
         # MyNeuralNetworkSelection(),
         MyNormalPairwiseComparisonSelection(),
         MyOptimizedNormalPairwiseComparisonSelection(),
+        MyOptimizedCauchyPairwiseComparisonSelection(),
         MyNormalSelection(),
         MyNormalFadingSelection(),
         MyCauchySelection(),
