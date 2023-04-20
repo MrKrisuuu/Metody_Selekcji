@@ -7,7 +7,11 @@ from jmetal.util.termination_criterion import StoppingByEvaluations  # Warunek k
 import time
 import copy
 
-from MySelections import MyNeuralNetworkSelection, MyNormalPairwiseComparisonSelection, MyOptimizedNormalPairwiseComparisonSelection
+from selections import (
+    MyNeuralNetworkSelection,
+    MyNormalPairwiseComparisonSelection,
+    MyOptimizedNormalPairwiseComparisonSelection,
+)
 
 
 S = TypeVar("S")
@@ -59,8 +63,13 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         mating_population = []
 
         while len(mating_population) < self.mating_pool_size:
-            if "flag_list" in self.selection_operator.__dict__.keys() and self.selection_operator.flag_list:
-                solution = self.selection_operator.execute(population, self.mating_pool_size)
+            if (
+                "flag_list" in self.selection_operator.__dict__.keys()
+                and self.selection_operator.flag_list
+            ):
+                solution = self.selection_operator.execute(
+                    population, self.mating_pool_size
+                )
             else:
                 solution = self.selection_operator.execute(population)
 
@@ -69,4 +78,4 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
             else:
                 mating_population.append(solution)
 
-        return mating_population[:self.mating_pool_size]
+        return mating_population[: self.mating_pool_size]

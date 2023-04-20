@@ -2,7 +2,9 @@ from typing import Callable, List
 
 from MyGeneticAlgorithm import MyGeneticAlgorithm
 from MyFunctions import RastriginFunction, Sphere
-from MySelections import (
+from selections import (
+    MyCauchyFadingSelection,
+    MyCauchySelection,
     MyNeuralNetworkSelection,
     MyNormalPairwiseComparisonSelection,
     MyOptimizedNormalPairwiseComparisonSelection,
@@ -27,20 +29,21 @@ def create_initial_solutions(problem, population_size):
     return [store.default_generator.new(problem) for _ in range(population_size)]
 
 
-def run_selections(
-    problems: List[Problem],
-    selections: List[Selection],
-    times: int
-):
+def run_selections(problems: List[Problem], selections: List[Selection], times: int):
     population_size = 100
     offspring_population_size = 30
     steps = 500
     for problem in problems:
-        results = {}
-        for selection in selections:
-            results[selection.get_name()] = {}
-            results[selection.get_name()]["times"] = []
-            results[selection.get_name()]["solutions"] = []
+        keys = [selection.get_name() for selection in selections]
+
+        results = {
+            key: {
+                "times": [],
+                "solutions": [],
+            }
+            for key in keys
+        }
+
         for i in range(times):
             initial_solutions = create_initial_solutions(problem, population_size)
             for selection in selections:
@@ -54,8 +57,13 @@ def run_selections(
                 solutions = algorithm.run(initial_solutions)
                 best_solution = algorithm.get_result()
                 solutions.append(best_solution)
-                results[selection.get_name()]["solutions"].append([solution.objectives[0] for solution in solutions])
-                results[selection.get_name()]["times"].append(algorithm.total_computing_time)
+
+                current_results = results[selection.get_name()]
+
+                current_results["solutions"].append(
+                    [solution.objectives[0] for solution in solutions]
+                )
+                current_results["times"].append(algorithm.total_computing_time)
                 print(
                     f"{i+1}. {selection.get_name()} for {problem.get_name()}: {best_solution.objectives[0]} in {algorithm.total_computing_time} seconds"
                 )
@@ -74,19 +82,23 @@ def run_selections(
 
 
 if __name__ == "__main__":
-    problems = [
-        RastriginFunction(100),
-        #Sphere(100)
-    ]
+    problems = [RastriginFunction(100), Sphere(100)]
     selections = [
-        #MyNeuralNetworkSelection(),
+        # MyNeuralNetworkSelection(),
         MyNormalPairwiseComparisonSelection(),
         MyOptimizedNormalPairwiseComparisonSelection(),
         MyNormalSelection(),
         MyNormalFadingSelection(),
+        MyCauchySelection(),
+        MyCauchyFadingSelection(),
         BestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
     times = 3
     run_selections(problems, selections, times)
+
+
+# skupić się na różnych rozkłądach (kosziego)
+# Estimation of dis(?) EDA
+# Reguła 5 sukcesów
