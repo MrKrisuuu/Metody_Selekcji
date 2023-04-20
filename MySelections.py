@@ -1,4 +1,3 @@
-from jmetal.core.operator import Selection
 from jmetal.operator.selection import *  # Selekcja
 
 from typing import List, TypeVar
@@ -39,6 +38,7 @@ def save(sols, sums, number, name):
 class MyNeuralNetworkSelection(Selection[List[S], S]):
     def __init__(self):
         super(MyNeuralNetworkSelection, self).__init__()
+        self.flag_list = True
 
     def execute(self, front: List[S], number=None) -> S:
         if front is None:
@@ -55,8 +55,9 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
                 individuals.append(front[x].variables + front[y].variables)
             sols = self.model.predict(individuals)
             for (i, (x, y)) in enumerate(combinations(range(len(front)), 2)):
-                matrix[x][y] = sols[i][0]
-                matrix[y][x] = -sols[i][0]
+                val = sols[i][0]
+                matrix[x][y] = val
+                matrix[y][x] = val
             sols = [sol.objectives[0] for sol in front]
             sums = [sum(row) for row in matrix]
             #save(sols, sums, number, self.get_name())
@@ -69,7 +70,7 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
         return "MyNeuralNetworkSelection"
 
     def train_model(self, problem):
-        training_population = 100
+        training_population = 150
         model = tf.keras.models.Sequential(
             [
                 tf.keras.layers.Dense(2 * problem.number_of_variables, activation="relu"),
@@ -94,9 +95,10 @@ class MyNeuralNetworkSelection(Selection[List[S], S]):
         self.model = model
 
 
-class MyRandomSelection(Selection[List[S], S]):
+class MyNormalPairwiseComparisonSelection(Selection[List[S], S]):
     def __init__(self):
-        super(MyRandomSelection, self).__init__()
+        super(MyNormalPairwiseComparisonSelection, self).__init__()
+        self.flag_list = True
 
     def evaluate(self, sol1, sol2, width):
         val1 = np.random.normal(sol1.objectives[0], width)
@@ -127,4 +129,100 @@ class MyRandomSelection(Selection[List[S], S]):
         return result[:number]
 
     def get_name(self) -> str:
-        return "MyRandomSelection"
+        return "MyNormalPairwiseComparisonSelection"
+
+
+class MyOptimizedNormalPairwiseComparisonSelection(Selection[List[S], S]):
+    def __init__(self):
+        super(MyOptimizedNormalPairwiseComparisonSelection, self).__init__()
+        self.flag_list = True
+
+    def evaluate(self, sol1, sol2, width):
+        return sol1.objectives[0] - sol2.objectives[0] + np.random.normal(0, 2*width)
+
+    def execute(self, front: List[S], number=None) -> S:
+        if front is None:
+            raise Exception("The front is null")
+        elif len(front) == 0:
+            raise Exception("The front is empty")
+
+        if len(front) == 1:
+            result = front[0]
+        else:
+            matrix = [[0 for _ in range(len(front))] for _ in range(len(front))]
+            sols = [sol.objectives[0] for sol in front]
+            width = max(sols) - min(sols)
+            for (x, y) in combinations(range(len(front)), 2):
+                val = self.evaluate(front[x], front[y], width)
+                matrix[x][y] = val
+                matrix[y][x] = -val
+            sums = [sum(row) for row in matrix]
+            #save(sols, sums, number, self.get_name())
+            my_result = list(zip(front, sums))
+            my_result.sort(key=lambda ind: ind[1], reverse=True)
+            result = [sol for sol, _ in my_result]
+        return result[:number]
+
+    def get_name(self) -> str:
+        return "MyOptimizedNormalPairwiseComparisonSelection"
+
+
+class MyNormalSelection(Selection[List[S], S]):
+    def __init__(self):
+        super(MyNormalSelection, self).__init__()
+        self.flag_list = True
+
+    def execute(self, front: List[S], number=None) -> S:
+        if front is None:
+            raise Exception("The front is null")
+        elif len(front) == 0:
+            raise Exception("The front is empty")
+
+        if len(front) == 1:
+            result = front[0]
+        else:
+            sols = [sol.objectives[0] for sol in front]
+            width = max(sols) - min(sols)
+            sums = [np.random.normal(-sol.objectives[0], width/4) for sol in front]
+            #save(sols, sums, number, self.get_name())
+            my_result = list(zip(front, sums))
+            my_result.sort(key=lambda ind: ind[1], reverse=True)
+            result = [sol for sol, _ in my_result]
+        return result[:number]
+
+    def get_name(self) -> str:
+        return "MyNormalSelection"
+
+
+class MyNormalFadingSelection(Selection[List[S], S]):
+    def __init__(self):
+        super(MyNormalFadingSelection, self).__init__()
+        self.flag_list = True
+        self.fade = 1
+
+    def execute(self, front: List[S], number=None) -> S:
+        if front is None:
+            raise Exception("The front is null")
+        elif len(front) == 0:
+            raise Exception("The front is empty")
+
+        if len(front) == 1:
+            result = front[0]
+        else:
+            sols = [sol.objectives[0] for sol in front]
+            width = max(sols) - min(sols)
+            sums = [np.random.normal(-sol.objectives[0], self.fade*width) for sol in front]
+            self.fade *= 0.99
+            #save(sols, sums, number, self.get_name())
+            my_result = list(zip(front, sums))
+            my_result.sort(key=lambda ind: ind[1], reverse=True)
+            result = [sol for sol, _ in my_result]
+        return result[:number]
+
+    def get_name(self) -> str:
+        return "MyNormalFadingSelection"
+
+
+# skupić się na różnych rozkłądach (kosziego)
+# Estimation of dis(?) EDA
+# Reguła 5 sukcesów
