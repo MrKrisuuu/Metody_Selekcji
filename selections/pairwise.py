@@ -52,7 +52,7 @@ class MyOptimizedNormalPairwiseComparisonSelection(Selection[List[S], S]):
         self.flag_list = True
 
     def evaluate(self, sol1, sol2, width):
-        return sol1.objectives[0] - sol2.objectives[0] + np.random.normal(0, 2 * width)
+        return sol2.objectives[0] - sol1.objectives[0] + np.random.normal(0, 2 * width)
 
     def execute(self, front: List[S], number=None) -> S:
         if front is None:
@@ -87,7 +87,7 @@ class MyOptimizedCauchyPairwiseComparisonSelection(Selection[List[S], S]):
         self.flag_list = True
 
     def evaluate(self, sol1, sol2, delta):
-        return sol1.objectives[0] - sol2.objectives[0] + delta
+        return sol2.objectives[0] - sol1.objectives[0] + delta
 
     def execute(self, front: List[S], number=None) -> S:
         if front is None:
@@ -101,7 +101,7 @@ class MyOptimizedCauchyPairwiseComparisonSelection(Selection[List[S], S]):
             matrix = [[0 for _ in range(len(front))] for _ in range(len(front))]
             sols = [sol.objectives[0] for sol in front]
             width = max(sols) - min(sols)
-            delta = cauchy.rvs(0, 2 * width, len(front) ** 2)
+            delta = cauchy.rvs(0, width/10, len(front) ** 2)
 
             for i, tupl in enumerate(combinations(range(len(front)), 2)):
                 x, y = tupl

@@ -30,7 +30,7 @@ def create_initial_solutions(problem, population_size):
 def run_selections(problems: List[Problem], selections: List[Selection], times: int):
     population_size = 100
     offspring_population_size = 30
-    steps = 500
+    steps = 1000
     for problem in problems:
         keys = [selection.get_name() for selection in selections]
 
@@ -87,10 +87,18 @@ if __name__ == "__main__":
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
-    times = 3
+    times = 20
     run_selections(problems, selections, times)
 
 
 # skupić się na różnych rozkłądach (kosziego)
-# Estimation of dis(?) EDA
-# Reguła 5 sukcesów
+# Estimation of dis(?) EDA -> zostawić
+# Reguła 5 sukcesów -> zrobić
+
+
+# niepełne porównania -> przetestować (niekompletne macierze porównywania parami)
+# zobaczyć maila
+
+# usunąć z dominancję
+# dodać odchylenie statndardowe
+# inne problemy

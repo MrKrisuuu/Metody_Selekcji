@@ -26,7 +26,7 @@ class MyCauchySelection(Selection[List[S], S]):
         else:
             sols = [sol.objectives[0] for sol in front]
             width = max(sols) - min(sols)
-            sums = [cauchy.rvs(-sol.objectives[0], width / 4) for sol in front]
+            sums = [cauchy.rvs(-sol.objectives[0], width / 40) for sol in front]
             # save(sols, sums, number, self.get_name())
             my_result = list(zip(front, sums))
             my_result.sort(key=lambda ind: ind[1], reverse=True)
@@ -54,7 +54,7 @@ class MyCauchyFadingSelection(Selection[List[S], S]):
         else:
             sols = [sol.objectives[0] for sol in front]
             width = max(sols) - min(sols)
-            sums = [cauchy.rvs(-sol.objectives[0], self.fade * width) for sol in front]
+            sums = [cauchy.rvs(-sol.objectives[0], self.fade * width / 40) for sol in front]
             self.fade *= 0.9
             # save(sols, sums, number, self.get_name())
             my_result = list(zip(front, sums))
