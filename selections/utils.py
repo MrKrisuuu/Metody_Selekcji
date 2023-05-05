@@ -1,26 +1,18 @@
-from jmetal.operator.selection import *  # Selekcja
-
-from typing import List, TypeVar
-
-import tensorflow as tf
-from jmetal.config import store
-from itertools import combinations
-
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-import numpy as np
 from copy import deepcopy
-from scipy.stats import cauchy
-
-
-S = TypeVar("S")
-
-global nr
-nr = 1
+import os
 
 
 def save(sols, sums, number, name):
-    global nr
+    nr = 1
+    if not os.path.exists(f"./states_{name}"):
+        os.makedirs(f"./states_{name}")
+    while True:
+        if os.path.exists(f"./states_{name}/{nr}.png"):
+            nr += 1
+        else:
+            break
     plt.scatter(sols, sums, color="red")
     reg = LinearRegression().fit([[sol] for sol in sols], sums)
     a = reg.coef_

@@ -6,15 +6,35 @@ from jmetal.util.termination_criterion import StoppingByEvaluations  # Warunek k
 
 import time
 import copy
+import os
+import shutil
 
 from selections import (
-    MyNeuralNetworkSelection,
-    MyNormalPairwiseComparisonSelection,
-    MyOptimizedNormalPairwiseComparisonSelection,
+    MyNeuralNetworkSelection
 )
 
+from statistics import stdev
 
 S = TypeVar("S")
+
+
+def calc_stdev(solutions):
+    tmps = [[] for _ in range(len(solutions[0].variables))]
+    for solution in solutions:
+        for i, var in enumerate(solution.variables):
+            tmps[i].append(var)
+    tmp_stdev = 0
+    for vars in tmps:
+        tmp_stdev += stdev(vars)
+    return tmp_stdev
+
+
+def save_stdev(stdevs, problem, selection, path="./stdevs"):
+    with open(f"{path}/{problem.get_name()}/{selection.get_name()}.txt", "a") as f:
+        for stdev in stdevs:
+            f.write(str(stdev))
+            f.write(';')
+        f.write('\n')
 
 
 class MyGeneticAlgorithm(GeneticAlgorithm):
@@ -51,11 +71,14 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         self.init_progress()
 
         solutions = []
+        stdevs = []
         while not self.stopping_condition_is_met():
             solutions.append(self.solutions[0])
+            stdevs.append(calc_stdev(self.solutions))
             self.step()
             self.update_progress()
-
+        stdevs.append(calc_stdev(self.solutions))
+        save_stdev(stdevs, self.problem, self.selection_operator)
         self.total_computing_time = time.time() - self.start_computing_time
         return solutions
 
@@ -78,4 +101,4 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
             else:
                 mating_population.append(solution)
 
-        return mating_population[: self.mating_pool_size]
+        return mating_population[:self.mating_pool_size]
