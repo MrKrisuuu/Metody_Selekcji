@@ -40,7 +40,6 @@ def run_selections(problems: List[Problem],
                    times: int,
                    population_size: int,
                    offspring_population_size: int,
-                   steps: int,
                    path= "./results"):
     for problem in problems:
         prepare_files(f"{path}/{problem.get_name()}", selections)
@@ -50,7 +49,7 @@ def run_selections(problems: List[Problem],
             initial_solutions = create_initial_solutions(problem, population_size)
             for selection in selections:
                 algorithm = MyGeneticAlgorithm(
-                    steps=steps,
+                    steps=problem.steps,
                     problem=problem,
                     population_size=population_size,
                     offspring_population_size=offspring_population_size,
@@ -74,33 +73,34 @@ def run_selections(problems: List[Problem],
 
 if __name__ == "__main__":
     problems = [
-        Sphere(100),
-        Rastrigin(100),
-        Rosenbrock(100),
-        Schwefel(100),
-        Griewank(100)
+        Sphere(100, 1000),
+        Rastrigin(100, 7000),
+        Rosenbrock(100, 10000),
+        Schwefel(100, 4000),
+        Griewank(100, 1000)
     ]
     selections = [
         MyNormalPairwiseComparisonSelection(2),
         MyCauchyPairwiseComparisonSelection(0.2),
         MyNormalSelection(0.25),
         MyCauchySelection(0.025),
-        MyNormalFadingSelection(0.5, 0.999),
-        MyCauchyFadingSelection(0.05, 0.999),
+        # MyNormalFadingSelection(0.5, 0.999),
+        # MyCauchyFadingSelection(0.05, 0.999),
         MyBestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
     times = 10
     population_size = 100
-    offspring_population_size = 30
-    steps = 2000
-    # run_selections(problems, selections, times, population_size, offspring_population_size, steps)
-    plot_iterations(problems, selections, steps, times)
-    plot_stdev(problems, selections, steps)
-    #plot_single(problems, MyCauchySelection(), steps, times)
+    offspring_population_size = 40
+    #run_selections(problems, selections, times, population_size, offspring_population_size)
+    plot_iterations(problems, selections, times)
+    #plot_stdev(problems, selections)
+    #plot_single(problems, MyCauchySelection(), times)
 
 
 # TODO
-# Reguła 5 sukcesów -> zrobić
 # niepełne porównania -> przetestować (niekompletne macierze porównywania parami)
+# umówić się z Kuokowskim
+# wziąć najgorze odchylenie (śrenia?)
+# prównać różnorodność z efektywnością
