@@ -6,20 +6,40 @@ from jmetal.util.termination_criterion import StoppingByEvaluations  # Warunek k
 
 import time
 import copy
+import os
+import shutil
 
 from selections import (
-    MyNeuralNetworkSelection,
-    MyNormalPairwiseComparisonSelection,
-    MyOptimizedNormalPairwiseComparisonSelection,
+    MyNeuralNetworkSelection
 )
 
+from statistics import stdev
 
 S = TypeVar("S")
 
 
+def calc_stdev(solutions):
+    tmps = [[] for _ in range(len(solutions[0].variables))]
+    for solution in solutions:
+        for i, var in enumerate(solution.variables):
+            tmps[i].append(var)
+    tmp_stdev = 0
+    for vars in tmps:
+        tmp_stdev += stdev(vars)
+    return tmp_stdev
+
+
+def save_stdev(stdevs, problem, selection, path="./stdevs"):
+    with open(f"{path}/{problem.get_name()}/{selection.get_name()}.txt", "a") as f:
+        for stdev in stdevs:
+            f.write(str(stdev))
+            f.write(';')
+        f.write('\n')
+
+
 class MyGeneticAlgorithm(GeneticAlgorithm):
     def __init__(
-        self, steps, problem, population_size, offspring_population_size, selection
+        self, steps, problem, population_size, offspring_population_size, selection, if_std=False
     ):
         super(MyGeneticAlgorithm, self).__init__(
             problem=problem,
@@ -34,6 +54,7 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
             ),
             crossover=SBXCrossover(probability=1.0, distribution_index=20),
         )
+        self.if_std = if_std
 
     def run(self, initial_solutions=None):
         """Execute the algorithm."""
@@ -51,11 +72,16 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         self.init_progress()
 
         solutions = []
+        stdevs = []
         while not self.stopping_condition_is_met():
             solutions.append(self.solutions[0])
+            if self.if_std:
+                stdevs.append(calc_stdev(self.solutions))
             self.step()
             self.update_progress()
-
+        if self.if_std:
+            stdevs.append(calc_stdev(self.solutions))
+            save_stdev(stdevs, self.problem, self.selection_operator)
         self.total_computing_time = time.time() - self.start_computing_time
         return solutions
 
@@ -78,4 +104,4 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
             else:
                 mating_population.append(solution)
 
-        return mating_population[: self.mating_pool_size]
+        return mating_population[:self.mating_pool_size]
