@@ -39,7 +39,7 @@ def save_stdev(stdevs, problem, selection, path="./stdevs"):
 
 class MyGeneticAlgorithm(GeneticAlgorithm):
     def __init__(
-        self, steps, problem, population_size, offspring_population_size, selection, if_std=False
+        self, steps, problem, population_size, offspring_population_size, selection, std_count=0
     ):
         super(MyGeneticAlgorithm, self).__init__(
             problem=problem,
@@ -54,7 +54,7 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
             ),
             crossover=SBXCrossover(probability=1.0, distribution_index=20),
         )
-        self.if_std = if_std
+        self.std_count = std_count
 
     def run(self, initial_solutions=None):
         """Execute the algorithm."""
@@ -75,11 +75,11 @@ class MyGeneticAlgorithm(GeneticAlgorithm):
         stdevs = []
         while not self.stopping_condition_is_met():
             solutions.append(self.solutions[0])
-            if self.if_std:
+            if len(stdevs) < self.std_count-1:
                 stdevs.append(calc_stdev(self.solutions))
             self.step()
             self.update_progress()
-        if self.if_std:
+        if self.std_count > 0:
             stdevs.append(calc_stdev(self.solutions))
             save_stdev(stdevs, self.problem, self.selection_operator)
         self.total_computing_time = time.time() - self.start_computing_time

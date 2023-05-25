@@ -8,15 +8,18 @@ def average(data):
     data.sort()
     n = int(len(data) * 0.25)
     log_data = [log(val, 10) for val in data]
-    return 10**mean(log_data[n:-n])
+    if n==0:
+        return 10**mean(log_data)
+    return 10 ** mean(log_data[n:-n])
 
 
-def plot_iterations(problems, selections, times, path="./results"):
+def plot_iterations(problems, selections, path="./results"):
     for problem in problems:
         for selection in selections:
             total_time = 0
             with open(f"{path}/{problem.get_name()}/{selection.get_name()}.txt", "r") as f:
                 lines = f.readlines()
+                times = len(lines)
                 epochs = len(lines[0].split(';')) - 1
                 res = [[] for _ in range(epochs)]
                 for line in lines:
@@ -36,11 +39,12 @@ def plot_iterations(problems, selections, times, path="./results"):
         plt.show()
 
 
-def plot_single(problems, selection, times):
+def plot_single(problems, selection):
     for problem in problems:
         with open(f"{problem.get_name()}/{selection.get_name()}.txt", "r") as f:
             total_time = 0
             lines = f.readlines()
+            times = len(lines)
             epochs = len(lines[0].split(';')) - 1
             res = [[] for _ in range(epochs)]
             for line in lines:
@@ -88,3 +92,31 @@ def plot_stdev(problems, selections, path="./stdevs"):
         plt.legend()
         plt.show()
 
+
+def plot_compare(problems, selections, path_res="./results", path_stdev="./stdevs"):
+    for problem in problems:
+        for selection in selections:
+            with open(f"{path_res}/{problem.get_name()}/{selection.get_name()}.txt", "r") as f:
+                lines = f.readlines()
+                res = []
+                for line in lines:
+                    result = line.split(';')[-2]
+                    result = float(result)
+                    res.append(result)
+                avg = average(res)
+            with open(f"{path_stdev}/{problem.get_name()}/{selection.get_name()}.txt", "r") as f:
+                lines = f.readlines()
+                epochs = len(lines[0].split(';')) - 1
+                res = [[] for _ in range(epochs)]
+                for line in lines:
+                    result = line.split(';')
+                    result = [float(res) for res in result[:-1]]
+                    for i, val in enumerate(result):
+                        res[i].append(val)
+                stdevs = mean([mean(epoch) for epoch in res])
+            plt.scatter(avg, stdevs, label=selection.get_name())
+        plt.title(f"{problem.get_name()}")
+        plt.xlabel("Result")
+        plt.ylabel("Diversity")
+        plt.legend()
+        plt.show()
