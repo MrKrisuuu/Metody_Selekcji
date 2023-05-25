@@ -4,7 +4,7 @@ import shutil
 
 from MyGeneticAlgorithm import MyGeneticAlgorithm
 from MyFunctions import Sphere, Rastrigin, Rosenbrock, Schwefel, Griewank
-from plot import plot_iterations, plot_single, plot_stdev
+from plot import plot_iterations, plot_single, plot_stdev, plot_compare
 from selections import (
     MyNormalPairwiseComparisonSelection,
     MyCauchyPairwiseComparisonSelection,
@@ -40,7 +40,8 @@ def run_selections(problems: List[Problem],
                    times: int,
                    population_size: int,
                    offspring_population_size: int,
-                   path= "./results"):
+                   path= "./results",
+                   std_count=0):
     for problem in problems:
         prepare_files(f"{path}/{problem.get_name()}", selections)
         prepare_files(f"./stdevs/{problem.get_name()}", selections)
@@ -54,6 +55,7 @@ def run_selections(problems: List[Problem],
                     population_size=population_size,
                     offspring_population_size=offspring_population_size,
                     selection=selection,
+                    std_count=std_count
                 )
                 solutions = algorithm.run(initial_solutions)
                 best_solution = algorithm.get_result()
@@ -74,9 +76,9 @@ def run_selections(problems: List[Problem],
 if __name__ == "__main__":
     problems = [
         Sphere(100, 1000),
-        Rastrigin(100, 7000),
-        Rosenbrock(100, 10000),
-        Schwefel(100, 4000),
+        Rastrigin(100, 10000),
+        Rosenbrock(100, 7000),
+        Schwefel(100, 3000),
         Griewank(100, 1000)
     ]
     selections = [
@@ -84,23 +86,15 @@ if __name__ == "__main__":
         MyCauchyPairwiseComparisonSelection(0.2),
         MyNormalSelection(0.25),
         MyCauchySelection(0.025),
-        # MyNormalFadingSelection(0.5, 0.999),
-        # MyCauchyFadingSelection(0.05, 0.999),
         MyBestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
     times = 10
-    population_size = 100
-    offspring_population_size = 40
-    #run_selections(problems, selections, times, population_size, offspring_population_size)
-    plot_iterations(problems, selections, times)
-    #plot_stdev(problems, selections)
-    #plot_single(problems, MyCauchySelection(), times)
+    population_size = 20
+    offspring_population_size = 10
+    run_selections(problems, selections, times, population_size, offspring_population_size, std_count=100)
+    plot_iterations(problems, selections)
+    plot_stdev(problems, selections)
+    plot_compare(problems, selections)
 
-
-# TODO
-# niepełne porównania -> przetestować (niekompletne macierze porównywania parami)
-# umówić się z Kuokowskim
-# wziąć najgorze odchylenie (śrenia?)
-# prównać różnorodność z efektywnością
