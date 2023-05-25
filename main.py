@@ -75,22 +75,26 @@ def run_selections(problems: List[Problem],
 
 if __name__ == "__main__":
     problems = [
-        Sphere(100, 1000),
-        Rastrigin(100, 10000),
-        Rosenbrock(100, 7000),
-        Schwefel(100, 3000),
-        Griewank(100, 1000)
+        Sphere(10, 100),
+        Rastrigin(10, 2000),
+        Rosenbrock(10, 1000),
+        Schwefel(10, 300),
+        Griewank(10, 200),
+
     ]
     selections = [
         MyNormalPairwiseComparisonSelection(2),
         MyCauchyPairwiseComparisonSelection(0.2),
+
         MyNormalSelection(0.25),
+
         MyCauchySelection(0.025),
+
         MyBestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
-    times = 10
+    times = 1
     population_size = 20
     offspring_population_size = 10
     run_selections(problems, selections, times, population_size, offspring_population_size, std_count=100)

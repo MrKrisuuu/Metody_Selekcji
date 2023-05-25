@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 from statistics import mean, stdev
 from math import log
+from sklearn.linear_model import LinearRegression
 
 
 def average(data):
@@ -95,6 +96,8 @@ def plot_stdev(problems, selections, path="./stdevs"):
 
 def plot_compare(problems, selections, path_res="./results", path_stdev="./stdevs"):
     for problem in problems:
+        avgs = []
+        stdevs = []
         for selection in selections:
             with open(f"{path_res}/{problem.get_name()}/{selection.get_name()}.txt", "r") as f:
                 lines = f.readlines()
@@ -113,8 +116,17 @@ def plot_compare(problems, selections, path_res="./results", path_stdev="./stdev
                     result = [float(res) for res in result[:-1]]
                     for i, val in enumerate(result):
                         res[i].append(val)
-                stdevs = mean([mean(epoch) for epoch in res])
-            plt.scatter(avg, stdevs, label=selection.get_name())
+                stdev = mean([mean(epoch) for epoch in res])
+            plt.scatter(avg, stdev, label=selection.get_name())
+            stdevs.append(stdev)
+            avgs.append(avg)
+
+        model = LinearRegression()
+        model.fit([[avg] for avg in avgs], stdevs)
+        x_range = [min(avgs), max(avgs)]
+        y_range = [model.predict([[x_range[0]]]), model.predict([[x_range[1]]])]
+        plt.plot(x_range, y_range, linewidth=0.5, color="black")
+
         plt.title(f"{problem.get_name()}")
         plt.xlabel("Result")
         plt.ylabel("Diversity")

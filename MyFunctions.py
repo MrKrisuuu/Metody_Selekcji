@@ -42,7 +42,7 @@ class Sphere(FloatProblem):
         return solution
 
     def get_name(self) -> str:
-        return 'Sphere'
+        return f"Sphere({self.number_of_variables}, {self.steps})"
 
 
 class Rastrigin(FloatProblem):
@@ -74,7 +74,7 @@ class Rastrigin(FloatProblem):
         return solution
 
     def get_name(self):
-        return "Rastrigin"
+        return f"Rastrigin({self.number_of_variables}, {self.steps})"
 
 
 class Rosenbrock(FloatProblem):
@@ -106,7 +106,7 @@ class Rosenbrock(FloatProblem):
         return solution
 
     def get_name(self):
-        return "Rosenbrock"
+        return f"Rosenbrock({self.number_of_variables}, {self.steps})"
 
 
 class Schwefel(FloatProblem):
@@ -138,7 +138,7 @@ class Schwefel(FloatProblem):
         return solution
 
     def get_name(self):
-        return "Schwefel"
+        return f"Schwefel({self.number_of_variables}, {self.steps})"
 
 
 class Griewank(FloatProblem):
@@ -174,4 +174,4 @@ class Griewank(FloatProblem):
         return solution
 
     def get_name(self):
-        return "Griewank"
+        return f"Griewank({self.number_of_variables}, {self.steps})"
