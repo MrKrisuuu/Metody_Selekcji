@@ -78,27 +78,44 @@ if __name__ == "__main__":
         Sphere(10, 100),
         Rastrigin(10, 2000),
         Rosenbrock(10, 1000),
-        Schwefel(10, 300),
+        Schwefel(10, 500),
         Griewank(10, 200),
 
+        Sphere(25, 250),
+        Rastrigin(25, 5000),
+        Rosenbrock(25, 2500),
+        Schwefel(25, 1000),
+        Griewank(25, 500),
+
+        Rastrigin(50, 10000),
+        Rosenbrock(50, 5000),
+        Schwefel(50, 2000),
+
+        Schwefel(100, 4000),
     ]
     selections = [
-        MyNormalPairwiseComparisonSelection(2),
-        MyCauchyPairwiseComparisonSelection(0.2),
-
+        # MyNormalPairwiseComparisonSelection(2),
+        # MyCauchyPairwiseComparisonSelection(0.2),
+        MyNormalSelection(0.05),
+        # MyNormalSelection(0.15),
         MyNormalSelection(0.25),
-
+        # MyNormalSelection(0.40),
+        # MyNormalSelection(0.65),
+        MyNormalSelection(1),
+        MyCauchySelection(0.005),
+        # MyCauchySelection(0.015),
         MyCauchySelection(0.025),
-
+        MyCauchySelection(0.040),
+        # MyCauchySelection(0.065),
+        MyCauchySelection(0.1),
         MyBestSolutionSelection(),
         BinaryTournamentSelection(),
         RandomSolutionSelection(),
     ]
-    times = 1
+    times = 20
     population_size = 20
     offspring_population_size = 10
     run_selections(problems, selections, times, population_size, offspring_population_size, std_count=100)
     plot_iterations(problems, selections)
     plot_stdev(problems, selections)
     plot_compare(problems, selections)
-
